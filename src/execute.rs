@@ -10,7 +10,7 @@ pub fn execute(code: &Bytecode, tape_size: usize) {
     execute_recurse(code, &mut tape, &mut mc, tape_size == 0);
 }
 
-pub fn execute_recurse(code: &Bytecode, tape: &mut Vec<crate::Cell>, mc: &mut usize, unbound_tape: bool) {
+fn execute_recurse(code: &Bytecode, tape: &mut Vec<crate::Cell>, mc: &mut usize, unbound_tape: bool) {
     for i in code {
         use crate::bytecode::BfOperation;
         match i {
