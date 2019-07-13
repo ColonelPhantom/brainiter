@@ -8,6 +8,7 @@ pub enum BfOperation {
     Print,
     Read,
     Loop(Bytecode),
+    StaticLoop(Bytecode),
 }
 pub type Bytecode = Vec<BfOperation>;
 
@@ -21,9 +22,16 @@ enum BfContractable {
 }
 
 pub fn parse_bf(bf: &mut std::str::Chars) -> Bytecode {
+    parse_bf_internal(bf).0
+}
+
+fn parse_bf_internal(bf: &mut std::str::Chars) -> (Bytecode, bool) {
     let mut bytecode = Bytecode::new();
     let mut lastop: BfContractable = BfContractable::No;
     let mut lastcount: usize = 0;
+
+    let mut is_static = true;
+    let mut offset = 0;
 
     macro_rules! dump_contract {
         () => {
@@ -67,15 +75,28 @@ pub fn parse_bf(bf: &mut std::str::Chars) -> Bytecode {
         match c {
             '+' => contractable!(BfContractable::Add),
             '-' => contractable!(BfContractable::Sub),
-            '<' => contractable!(BfContractable::Left),
-            '>' => contractable!(BfContractable::Right),
+            '<' => {
+                contractable!(BfContractable::Left);
+                offset -= 1;
+            },
+            '>' => {
+                contractable!(BfContractable::Right);
+                offset += 1;
+            },
             '.' => non_contractable!(Print),
             ',' => non_contractable!(Read),
-                let child = parse_bf(bf);
+            '[' => {
+                let (child, child_static) = parse_bf_internal(bf);
+                if !child_static {
+                    is_static = false;
+                }
                 if child.len() == 1 && child[0] == Sub(std::num::Wrapping(1)) {
                     non_contractable!(Clear);
                 } else {
-                   non_contractable!(Loop(child));
+                   match child_static { 
+                        false => non_contractable!(Loop(child)),
+                        true => non_contractable!(StaticLoop(child)),
+                    }
                 }
             },
             ']' => {
@@ -85,5 +106,8 @@ pub fn parse_bf(bf: &mut std::str::Chars) -> Bytecode {
             _ => {} // Unknown characters are comments in brainfuck
         }
     }
-    return bytecode;
+    if offset != 0 {
+        is_static = false;
+    }
+    return (bytecode, is_static);
 }
