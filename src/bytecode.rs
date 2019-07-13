@@ -26,12 +26,14 @@ pub fn parse_bf(bf: &mut std::str::Chars) -> Bytecode {
 
     macro_rules! dump_contract {
         () => {
-            match lastop {
-                BfContractable::Add => bytecode.push(BfOperation::Add(std::num::Wrapping(lastcount as u8))),
-                BfContractable::Sub => bytecode.push(BfOperation::Sub(std::num::Wrapping(lastcount as u8))),
-                BfContractable::Right => bytecode.push(BfOperation::Right(lastcount)),
-                BfContractable::Left => bytecode.push(BfOperation::Left(lastcount)),
-                BfContractable::No => {},
+            if lastcount > 0 {
+                match lastop {
+                    BfContractable::Add => bytecode.push(BfOperation::Add(std::num::Wrapping(lastcount as u8))),
+                    BfContractable::Sub => bytecode.push(BfOperation::Sub(std::num::Wrapping(lastcount as u8))),
+                    BfContractable::Right => bytecode.push(BfOperation::Right(lastcount)),
+                    BfContractable::Left => bytecode.push(BfOperation::Left(lastcount)),
+                    BfContractable::No => {},
+                }
             }
         };
     }
@@ -69,7 +71,10 @@ pub fn parse_bf(bf: &mut std::str::Chars) -> Bytecode {
             '.' => non_contractable!(Print),
             ',' => non_contractable!(Read),
             '[' => non_contractable!(Loop(parse_bf(bf))),
-            ']' => break,
+            ']' => {
+                dump_contract!();
+                break;
+            },
             _ => {} // Unknown characters are comments in brainfuck
         }
     }
