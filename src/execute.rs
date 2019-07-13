@@ -26,11 +26,8 @@ pub fn execute_recurse(code: &Bytecode, tape: &mut Vec<crate::Cell>, mc: &mut us
                 }
             },
         }
-        println!("Just executed {:?}!", i);
-        std::thread::sleep_ms(10);
         while unbound_tape && *mc >= tape.len() {
             tape.push(crate::Cell::default());
-            println!("Expanding tape: {} > {}", *mc, tape.len());
         }
     }
 }
