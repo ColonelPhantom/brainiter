@@ -1,9 +1,10 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BfOperation {
     Add(crate::Cell),
     Sub(crate::Cell),
     Right(usize),
     Left(usize),
+    Clear,
     Print,
     Read,
     Loop(Bytecode),
@@ -70,7 +71,13 @@ pub fn parse_bf(bf: &mut std::str::Chars) -> Bytecode {
             '>' => contractable!(BfContractable::Right),
             '.' => non_contractable!(Print),
             ',' => non_contractable!(Read),
-            '[' => non_contractable!(Loop(parse_bf(bf))),
+                let child = parse_bf(bf);
+                if child.len() == 1 && child[0] == Sub(std::num::Wrapping(1)) {
+                    non_contractable!(Clear);
+                } else {
+                   non_contractable!(Loop(child));
+                }
+            },
             ']' => {
                 dump_contract!();
                 break;

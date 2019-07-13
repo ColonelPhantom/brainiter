@@ -18,6 +18,7 @@ fn execute_recurse(code: &Bytecode, tape: &mut Vec<crate::Cell>, mc: &mut usize,
             BfOperation::Sub(x) => tape[*mc] -= x,
             BfOperation::Right(x) => *mc += x,
             BfOperation::Left(x) => *mc -= x,
+            BfOperation::Clear => tape[*mc] = std::num::Wrapping(0),
             BfOperation::Print => print!("{}", tape[*mc].0 as char),
             BfOperation::Read => tape[*mc] = std::num::Wrapping(std::io::stdin().bytes().next().unwrap().unwrap() as u8),
             BfOperation::Loop(c) => {
