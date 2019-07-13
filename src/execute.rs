@@ -14,10 +14,10 @@ pub fn execute_recurse(code: &Bytecode, tape: &mut Vec<crate::Cell>, mc: &mut us
     for i in code {
         use crate::bytecode::BfOperation;
         match i {
-            BfOperation::Add => tape[*mc] += std::num::Wrapping(1),
-            BfOperation::Sub => tape[*mc] -= std::num::Wrapping(1),
-            BfOperation::Right => *mc += 1,
-            BfOperation::Left => *mc -= 1,
+            BfOperation::Add(x) => tape[*mc] += x,
+            BfOperation::Sub(x) => tape[*mc] -= x,
+            BfOperation::Right(x) => *mc += x,
+            BfOperation::Left(x) => *mc -= x,
             BfOperation::Print => print!("{}", tape[*mc].0 as char),
             BfOperation::Read => tape[*mc] = std::num::Wrapping(std::io::stdin().bytes().next().unwrap().unwrap() as u8),
             BfOperation::Loop(c) => {
@@ -26,7 +26,7 @@ pub fn execute_recurse(code: &Bytecode, tape: &mut Vec<crate::Cell>, mc: &mut us
                 }
             },
         }
-        if unbound_tape && *mc >= tape.len() {
+        while unbound_tape && *mc >= tape.len() {
             tape.push(crate::Cell::default());
         }
     }
