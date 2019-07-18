@@ -1,5 +1,6 @@
 mod bytecode;
 mod execute;
+mod to_c;
 
 type Cell = std::num::Wrapping<u8>;
 
@@ -13,6 +14,7 @@ fn main() {
     let bytecode = bytecode::parse_bf(source.chars().by_ref());
 
 
-    println!("{:?}", bytecode);
+    // println!("{:?}", bytecode);
     execute::execute(&bytecode, 0);
+    // println!("{}", to_c::compile_c(&bytecode, 4000));
 }
